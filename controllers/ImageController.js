@@ -28,21 +28,20 @@ exports.login= async (req,res,next) => {
     const user = await User.findOne({ email: req.body.email });
     if (!user) {
         res.json({msg:"User does not exist!"});
-        throw new Error('User does not exist!');
-    }
+    } 
     const isEqual = await bcrypt.compare(req.body.password, user.password);
-    if (!isEqual) {
-        res.json({msg:"Password is incorrect!"});
-        throw new Error('Password is incorrect!');
+      if (!isEqual) {
+          res.json({msg:"Password is incorrect!"});
+      } else {
+        const token = jwt.sign(
+          { userId: user.id, email: user.email },
+          'somesupersecretkey',
+          {
+          expiresIn: '1h'
+          }
+      );
+      res.json({ userId: user.id, token: token, tokenExpiration: 1 });
     }
-    const token = jwt.sign(
-        { userId: user.id, email: user.email },
-        'somesupersecretkey',
-        {
-        expiresIn: '1h'
-        }
-    );
-    res.json({ userId: user.id, token: token, tokenExpiration: 1 });
 }
 
 exports.getPhoto=async (req, res,next)=> {
